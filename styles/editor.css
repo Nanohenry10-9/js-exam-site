@@ -1,0 +1,57 @@
+.editor {
+	border: 2px solid #0007;
+	border-radius: 3px;
+	text-align: left;
+	width: 100%;
+}
+
+.editor-wrapper {
+	position: relative;
+}
+
+.editor-input {
+	padding: 0;
+	margin: 0;
+	position: absolute;
+	top: 0;
+	left: 0;
+	color: #0000;
+	background-color: #0000;
+	z-index: 99;
+	border: none;
+	overflow: hidden;
+	outline: none;
+	resize: none;
+	caret-color: #000;
+	padding: 5px;
+	text-align: left;
+
+	font-size: 18px !important;
+	font-family: Consolas !important;
+	white-space: pre;
+}
+
+.editor-overlay {
+	padding: 0;
+	position: absolute;
+	top: 0;
+	left: 0;
+	padding: 5px;
+	text-align: left;
+	overflow: hidden;
+
+	font-size: 18px !important;
+	font-family: Consolas !important;
+	white-space: pre !important;
+}
+
+.editor-overlay * {
+	font-size: 18px !important;
+	font-family: Consolas !important;
+	white-space: pre !important;
+}
+
+.editor-input:placeholder-shown ~ .editor-overlay:after {
+	content: "// Your code here";
+	color: #888;
+}
