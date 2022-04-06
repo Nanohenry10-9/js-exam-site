@@ -29,6 +29,7 @@ const Questions = {
 				type: "multichoice",
 				prompt: "What is a variable in the context of JavaScript?",
 				options: Array.shuffle(options),
+				solution: options[0],
 				check: answer => ({
 					actual: answer,
 					expected: options[0],
@@ -47,6 +48,7 @@ const Questions = {
 				type: "multichoice",
 				prompt: "What is the role of <span class= \"code\">;</span> in JavaScript?",
 				options: Array.shuffle(options),
+				solution: options[0],
 				check: answer => ({
 					actual: answer,
 					expected: options[0],
@@ -65,6 +67,7 @@ const Questions = {
 				type: "multichoice",
 				prompt: "What is the difference between <span class= \"code\">==</span> and <span class= \"code\">===</span>?",
 				options: Array.shuffle(options),
+				solution: options[0],
 				check: answer => ({
 					actual: answer,
 					expected: options[0],
@@ -79,6 +82,7 @@ const Questions = {
 			return {
 				type: "coding-oneline",
 				prompt: `Define a <b>variable</b> called <span class="code">${varName}</span> with value <span class="code">${JSON.stringify(value)}</span>.`,
+				solution: `var ${varName} = ${JSON.stringify(value)};`,
 				check: code => {
 					const ret = Sandbox.run(code, varName, {});
 					return {
@@ -98,6 +102,7 @@ const Questions = {
 			return {
 				type: "coding-oneline",
 				prompt: `Define an <b>array</b> called <span class="code">${arrName}</span> with values ${values.map(val => `<span class="code">${JSON.stringify(val)}</span>`).join(", ")}, in that order.`,
+				solution: `var ${arrName} = [${values.map(val => JSON.stringify(val)).join(", ")}];`,
 				check: code => {
 					const ret = Sandbox.run(code, arrName, {});
 					return {
@@ -115,6 +120,7 @@ const Questions = {
 			return {
 				type: "coding",
 				prompt: `Define a <b>function</b> called <span class="code">${funcName}</span> that returns the value <span class="code">${JSON.stringify(retValue)}</span>.`,
+				solution: `function ${funcName}() {\n    return ${JSON.stringify(retValue)};\n}`,
 				check: code => {
 					const ret = Sandbox.run(`${code};if(typeof ${funcName}==="undefined"){return null}const __retval=${funcName}()`, "__retval", {});
 					return {
@@ -127,7 +133,7 @@ const Questions = {
 		},
 		() => {
 			const rangeStart = Math.floor(Math.random() * 2 + 1);
-			const rangeEnd = Math.floor(Math.random() * 10 + rangeStart + 1);
+			const rangeEnd = Math.floor(Math.random() * 10 + rangeStart + 6);
 
 			const range = [...Array(rangeEnd - rangeStart + 1).keys()].map(x => x + rangeStart);
 			
@@ -136,6 +142,7 @@ const Questions = {
 			return {
 				type: "coding",
 				prompt: `Print all integers from ${rangeStart} to ${rangeEnd} using <span class="code">console.log()</span>.`,
+				solution: `for (var i = ${rangeStart}; i <= ${rangeEnd}; i++) {\n    console.log(i);\n}`,
 				check: code => {
 					var outputs = [];
 					const customLog = value => outputs.push(value);
@@ -198,7 +205,7 @@ const Questions = {
 								DOM.createElement({
 									type: "div",
 									classes: ["button"],
-									children: ["Next question"],
+									children: [index === Questions._last.length - 1? "End exam" : "Next question"],
 									handlers: {
 										click: () => {
 											const editor = document.getElementById(`code-editor-${index + 1}-textarea`);
@@ -284,8 +291,8 @@ const Questions = {
 		};
 	},
 	generateResultTable: () => {
-		const formatAnswer = question => {
-			if (!question.userAnswer) {
+		const format = (question, answer) => {
+			if (!answer) {
 				return DOM.createElement({
 					type: "span",
 					classes: ["none-answer"],
@@ -296,11 +303,13 @@ const Questions = {
 				return DOM.createElement({
 					type: "span",
 					classes: ["code"],
-					children: [question.userAnswer]
+					children: [answer]
 				});
 			}
-			return question.userAnswer;
+			return answer;
 		};
+		const formatAnswer = question => format(question, question.userAnswer);
+		const formatSolution = question => format(question, question.question.solution);
 
 		const verdict = question => {
 			const result = question.question.check(question.userAnswer);
@@ -355,11 +364,15 @@ const Questions = {
 						}),
 						DOM.createElement({
 							type: "td",
-							children: ["Your&nbsp;answer"]
+							children: ["Your answer"]
 						}),
 						DOM.createElement({
 							type: "td",
 							children: ["Verdict"]
+						}),
+						DOM.createElement({
+							type: "td",
+							children: ["Correct/suggested solution"]
 						})
 					]
 				}),
@@ -378,6 +391,10 @@ const Questions = {
 						DOM.createElement({
 							type: "td",
 							children: [verdict(question)]
+						}),
+						DOM.createElement({
+							type: "td",
+							children: [formatSolution(question)]
 						})
 					]
 				}))
